@@ -1,5 +1,10 @@
+import { useState, useEffect, useContext } from "react";
 import { TouchableOpacity, FlatList, Alert } from "react-native";
+import "react-native-gesture-handler";
 
+import { firebase } from "../../firebase/config";
+import AppItem from "../../components/AppItem/AppItem";
+import { ThemeContext } from "../../context/ThemeContext";
 import {
   Container,
   OrderByContainer,
@@ -8,53 +13,68 @@ import {
   ListContainer,
 } from "./TodoList.styles";
 
-import { useState, useEffect } from "react";
-
-import * as Database from "../../libs/Database";
-import { TODO_LIST } from "../TodoForm/TodoForm";
-
-import AppItem from "../../components/AppItem/AppItem";
-
-import { ThemeContext } from "../../context/ThemeContext";
-import { useContext } from "react";
-
 const ORDER_BY_DESCRIPTION = "ORDER_BY_DESCRIPTION";
 const ORDER_BY_ID = "ORDER_BY_ID";
 
 const TodoList = ({ navigation, route }) => {
   const [items, setItems] = useState([]);
   const [orderBy, setOrderBy] = useState(ORDER_BY_ID);
-
   const theme = useContext(ThemeContext);
+
+  const entityRef = firebase.firestore().collection("todolist");
 
   useEffect(() => {
     console.log("loading stored data");
-    fetchDatabase();
+    fetchTodoListFirebase();
   }, [route]);
 
-  function fetchDatabase() {
-    Database.getItems(TODO_LIST).then((items) => setItems(items));
+  function fetchTodoListFirebase() {
+    entityRef
+      /* .where("authorID", "==", userID)*/
+      .orderBy("createdAt", "desc")
+      .onSnapshot(
+        (querySnapshot) => {
+          const newTodoList = [];
+          querySnapshot.forEach((doc) => {
+            const task = doc.data();
+            task.id = doc.id;
+            newTodoList.push(task);
+          });
+          setItems(newTodoList);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   }
 
-  async function handleEditPress(list, id) {
-    const item = await Database.getItem(list, id);
+  async function handleEditPress(id) {
+    console.log("handleEditPress", id);
+
+    let item;
+    await entityRef
+      .doc(id)
+      .get()
+      .then((docRef) => {
+        item = docRef.data();
+        item.id = id;
+      })
+      .catch((error) => {
+        console.log("document not found");
+      });
     navigation.navigate("TodoForm", item);
   }
 
-  function handleDeletePress(list, id) {
-    Alert.alert("Attention", "Are you sure of deleting this item?", [
-      {
-        text: "No",
-        onPress: () => console.log("Cancel pressed"),
-        style: "cancel",
-      },
-      {
-        text: "Yes",
-        onPress: () => {
-          Database.deleteItem(list, id).then((response) => fetchDatabase());
-        },
-      },
-    ]);
+  function handleDeletePress(id) {
+    entityRef
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log("Document successfully deleted!");
+      })
+      .catch((error) => {
+        console.error("Error removing document: ", error);
+      });
   }
 
   function handleOrderByDescription() {
@@ -75,9 +95,9 @@ const TodoList = ({ navigation, route }) => {
     setOrderBy(ORDER_BY_ID);
     setItems(
       items.sort(function (a, b) {
-        if (a.id > b.id) {
+        if (a.createdAt > b.createdAt) {
           return 1;
-        } else if (a.id < b.id) {
+        } else if (a.createdAt < b.createdAt) {
           return -1;
         }
         return 0;
@@ -87,7 +107,6 @@ const TodoList = ({ navigation, route }) => {
 
   return (
     <Container>
-      {console.log("items", items)}
       <OrderByContainer>
         <TouchableOpacity onPress={handleOrderById}>
           <TextOrderBy
@@ -114,8 +133,8 @@ const TodoList = ({ navigation, route }) => {
           renderItem={({ item }) => (
             <AppItem
               item={item}
-              handleDeletePress={() => handleDeletePress(TODO_LIST, item.id)}
-              handleEditPress={() => handleEditPress(TODO_LIST, item.id)}
+              handleDeletePress={() => handleDeletePress(item.id)}
+              handleEditPress={() => handleEditPress(item.id)}
             />
           )}
           ListEmptyComponent={<TextEmptyList>0 tasks created.</TextEmptyList>}
