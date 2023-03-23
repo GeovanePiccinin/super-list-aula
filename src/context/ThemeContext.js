@@ -2,12 +2,12 @@ import { createContext, useReducer } from "react";
 
 export const ThemeContext = createContext();
 
-const initialState = { baseColor: "#00c68e", name: "GREEN" };
+const initialState = { baseColor: "#2abac1", name: "GREEN" };
 
 const themeReducer = (state, action) => {
   switch (action.type) {
     case "GREEN":
-      return { baseColor: "#00c68e", name: "GREEN" };
+      return { baseColor: "#2abac1", name: "GREEN" };
     case "BLUE":
       return { baseColor: "#33a1fd", name: "BLUE" };
     default:

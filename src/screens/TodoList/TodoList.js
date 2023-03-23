@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { TouchableOpacity, FlatList, Alert } from "react-native";
 import "react-native-gesture-handler";
 
-import { firebase } from "../../firebase/config";
+import firebase from "../../firebase/config";
 import AppItem from "../../components/AppItem/AppItem";
 import { ThemeContext } from "../../context/ThemeContext";
 import {

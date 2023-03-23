@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { Keyboard } from "react-native";
 import { ThemeContext } from "../../context/ThemeContext";
 import { Feather as Icon } from "@expo/vector-icons";
-import { firebase } from "../../firebase/config";
+import firebase from "../../firebase/config";
 import {
   Container,
   Button,
