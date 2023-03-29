@@ -1,13 +1,55 @@
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import {
+  createDrawerNavigator,
+  DrawerItem,
+  DrawerItemList,
+  DrawerContentScrollView,
+} from "@react-navigation/drawer";
 import Settings from "../screens/Settings/Settings";
 import TabNavigator from "./TabNavigator";
 import { ThemeContext } from "../context/ThemeContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { signOut, onAuthStateChanged } from "@firebase/auth";
+import { auth } from "../firebase/config";
 
 const Drawer = createDrawerNavigator();
 
-const DrawerNavigator = () => {
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="Logout"
+        onPress={() => {
+          signOut(auth)
+            .then(() => {
+              console.log("signout successfully");
+              props.navigation.closeDrawer();
+              props.navigation.navigate("Login");
+            })
+            .catch((error) => {
+              alert(`Error signing out ${error}`);
+            });
+        }}
+      />
+    </DrawerContentScrollView>
+  );
+}
+
+const DrawerNavigator = ({ navigation }) => {
   const theme = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (!auth.currentUser) {
+      navigation.navigate("Login");
+    } else {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          navigation.navigate("Login");
+        }
+      });
+    }
+  }, []);
+
   return (
     <Drawer.Navigator
       screenOptions={{
@@ -17,6 +59,7 @@ const DrawerNavigator = () => {
           backgroundColor: "#e3e3e6",
         },
       }}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Home" component={TabNavigator} />
       <Drawer.Screen

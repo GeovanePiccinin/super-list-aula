@@ -63,7 +63,7 @@ const TodoList = ({ navigation, route }) => {
           task.id = doc.id;
           newTodoList.push(task);
         });
-        console.log(newTodoList);
+        //console.log(newTodoList);
         setItems(newTodoList);
       });
     } catch (e) {
@@ -140,7 +140,6 @@ const TodoList = ({ navigation, route }) => {
 
   return (
     <Container>
-      {console.log("items", items)}
       <OrderByContainer>
         <TouchableOpacity onPress={handleOrderById}>
           <TextOrderBy
