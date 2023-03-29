@@ -1,4 +1,5 @@
 import { Feather as Icon } from "@expo/vector-icons";
+import { Keyboard } from "react-native";
 import {
   Container,
   Button,
@@ -7,8 +8,9 @@ import {
   ButtonContainer,
 } from "./TodoForm.styles";
 import { useState, useEffect } from "react";
-
+import { doc, addDoc, collection, updateDoc } from "firebase/firestore";
 import * as Database from "../../libs/Database";
+import { db } from "../../firebase/config";
 
 export const TODO_LIST = "TODO_LIST";
 
@@ -16,6 +18,8 @@ console.log("database", Database);
 
 import { ThemeContext } from "../../context/ThemeContext";
 import { useContext } from "react";
+
+const superListRef = collection(db, "super-list-firebase");
 
 const TodoForm = ({ navigation, route }) => {
   const id = route.params ? route.params.id : undefined;
@@ -31,18 +35,21 @@ const TodoForm = ({ navigation, route }) => {
   }, [route]);
 
   async function handleSaveButtonPress() {
-    if (!description) {
-      console.log("description empty");
-      return;
-    }
+    if (description && description.length > 0) {
+      let data = route.params || {};
+      data.description = description;
+      if (!id) {
+        const timestamp = new Date().getTime();
+        data.createdAt = timestamp;
+        await addDoc(superListRef, data);
+      } else {
+        await updateDoc(doc(db, "super-list-firebase", id), data);
+      }
 
-    console.log("id handleSaveButtonPress", id);
-
-    const listItem = { description };
-    Database.saveItem(TODO_LIST, listItem, id).then((response) => {
       setDescription("");
-      navigation.navigate("TodoList", listItem);
-    });
+      Keyboard.dismiss();
+      navigation.navigate("TodoList");
+    }
   }
 
   async function handleCancelButtonPress() {

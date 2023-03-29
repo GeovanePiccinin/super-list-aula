@@ -8,6 +8,17 @@ import {
   ListContainer,
 } from "./TodoList.styles";
 
+import { db } from "../../firebase/config";
+import {
+  collection,
+  doc,
+  deleteDoc,
+  getDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
+
 import { useState, useEffect } from "react";
 
 import * as Database from "../../libs/Database";
@@ -23,21 +34,59 @@ const ORDER_BY_ID = "ORDER_BY_ID";
 
 const TodoList = ({ navigation, route }) => {
   const [items, setItems] = useState([]);
-  const [orderBy, setOrderBy] = useState(ORDER_BY_ID);
+  const [orderByAttr, setOrderByAttr] = useState(ORDER_BY_ID);
 
   const theme = useContext(ThemeContext);
 
+  const superListRef = collection(db, "super-list-firebase");
+
+  let unsubscribe;
+
   useEffect(() => {
     console.log("loading stored data");
-    fetchDatabase();
+
+    fetchDBFirebase();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [route]);
+
+  async function fetchDBFirebase() {
+    try {
+      const q = query(superListRef, orderBy("createdAt", "desc"));
+
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const newTodoList = [];
+        querySnapshot.forEach((doc) => {
+          const task = doc.data();
+          task.id = doc.id;
+          newTodoList.push(task);
+        });
+        console.log(newTodoList);
+        setItems(newTodoList);
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
   function fetchDatabase() {
     Database.getItems(TODO_LIST).then((items) => setItems(items));
   }
 
   async function handleEditPress(list, id) {
-    const item = await Database.getItem(list, id);
+    let item;
+
+    const docSnap = await getDoc(doc(superListRef, id));
+
+    if (docSnap.exists()) {
+      item = docSnap.data();
+      item.id = id;
+    } else {
+      console.log("No such document!");
+    }
+
     navigation.navigate("TodoForm", item);
   }
 
@@ -50,15 +99,19 @@ const TodoList = ({ navigation, route }) => {
       },
       {
         text: "Yes",
-        onPress: () => {
-          Database.deleteItem(list, id).then((response) => fetchDatabase());
+        onPress: async () => {
+          try {
+            await deleteDoc(doc(superListRef, id));
+          } catch (e) {
+            console.log(e);
+          }
         },
       },
     ]);
   }
 
   function handleOrderByDescription() {
-    setOrderBy(ORDER_BY_DESCRIPTION);
+    setOrderByAttr(ORDER_BY_DESCRIPTION);
     setItems(
       items.sort(function (a, b) {
         if (a.description > b.description) {
@@ -72,7 +125,7 @@ const TodoList = ({ navigation, route }) => {
   }
 
   function handleOrderById() {
-    setOrderBy(ORDER_BY_ID);
+    setOrderByAttr(ORDER_BY_ID);
     setItems(
       items.sort(function (a, b) {
         if (a.id > b.id) {
@@ -91,7 +144,9 @@ const TodoList = ({ navigation, route }) => {
       <OrderByContainer>
         <TouchableOpacity onPress={handleOrderById}>
           <TextOrderBy
-            color={orderBy === ORDER_BY_ID ? theme.state.baseColor : "#d6d6d6"}
+            color={
+              orderByAttr === ORDER_BY_ID ? theme.state.baseColor : "#d6d6d6"
+            }
           >
             Order By ID
           </TextOrderBy>
@@ -99,7 +154,7 @@ const TodoList = ({ navigation, route }) => {
         <TouchableOpacity onPress={handleOrderByDescription}>
           <TextOrderBy
             color={
-              orderBy === ORDER_BY_DESCRIPTION
+              orderByAttr === ORDER_BY_DESCRIPTION
                 ? theme.state.baseColor
                 : "#d6d6d6"
             }
