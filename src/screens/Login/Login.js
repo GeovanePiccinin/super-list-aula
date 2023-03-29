@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import styles from "./Login.styles";
+
 import { onAuthStateChanged } from "firebase/auth";
 import firebase, { auth } from "../../firebase/config";
+import { ScrollView } from "react-native";
+import {
+  Container,
+  InputText,
+  Button,
+  ButtonTitle,
+  FooterView,
+  FooterText,
+  FooterLink,
+} from "./Login.styles";
 
 export default function LoginScreen({ navigation }) {
   useEffect(() => {
@@ -53,18 +61,18 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <KeyboardAwareScrollView
-        style={{ flex: 1, width: "100%" }}
+    <Container>
+      <ScrollView
+        style={{
+          flexGrow: 1,
+          width: "100%",
+        }}
+        extraScrollHeight={100}
+        enableOnAndroid={true}
         keyboardShouldPersistTaps="always"
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        contentContainerStyle={{ flex: 1, justifyContent: "center" }}
       >
-        <Image
-          style={styles.logo}
-          source={require("../../../assets/icon.png")}
-        />
-        <TextInput
-          style={styles.input}
+        <InputText
           placeholder="E-mail"
           placeholderTextColor="#aaaaaa"
           onChangeText={(text) => setEmail(text)}
@@ -72,8 +80,7 @@ export default function LoginScreen({ navigation }) {
           underlineColorAndroid="transparent"
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
+        <InputText
           placeholderTextColor="#aaaaaa"
           secureTextEntry
           placeholder="Password"
@@ -82,18 +89,17 @@ export default function LoginScreen({ navigation }) {
           underlineColorAndroid="transparent"
           autoCapitalize="none"
         />
-        <TouchableOpacity style={styles.button} onPress={() => onLoginPress()}>
-          <Text style={styles.buttonTitle}>Log in</Text>
-        </TouchableOpacity>
-        <View style={styles.footerView}>
-          <Text style={styles.footerText}>
+        <Button onPress={() => onLoginPress()}>
+          <ButtonTitle>Log in</ButtonTitle>
+        </Button>
+
+        <FooterView>
+          <FooterText>
             Don't have an account?{" "}
-            <Text onPress={onFooterLinkPress} style={styles.footerLink}>
-              Sign up
-            </Text>
-          </Text>
-        </View>
-      </KeyboardAwareScrollView>
-    </View>
+            <FooterLink onPress={onFooterLinkPress}>Sign up</FooterLink>
+          </FooterText>
+        </FooterView>
+      </ScrollView>
+    </Container>
   );
 }

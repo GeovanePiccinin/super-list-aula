@@ -1,56 +1,62 @@
-import { StyleSheet } from "react-native";
+import styled from "styled-components/native";
 
-export default StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-  },
-  title: {},
-  logo: {
-    flex: 1,
-    height: 120,
-    width: 90,
-    alignSelf: "center",
-    margin: 30,
-  },
-  input: {
-    height: 48,
-    borderRadius: 5,
-    overflow: "hidden",
-    backgroundColor: "white",
-    marginTop: 10,
-    marginBottom: 10,
-    marginLeft: 30,
-    marginRight: 30,
-    paddingLeft: 16,
-  },
-  button: {
-    backgroundColor: "#788eec",
-    marginLeft: 30,
-    marginRight: 30,
-    marginTop: 20,
-    height: 48,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonTitle: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  footerView: {
-    flex: 1,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  footerText: {
-    fontSize: 16,
-    color: "#2e2e2d",
-  },
-  footerLink: {
-    color: "#788eec",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+export const Container = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  border-width: 5px;
+  border-color: pink;
+`;
+
+export const Logo = styled.Image`
+  flex: 1;
+  height: 120px;
+  width: 90px;
+  align-self: center;
+  margin: 30px;
+`;
+
+export const InputText = styled.TextInput`
+  height: 48px;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: white;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 30px;
+  margin-right: 30px;
+  padding-left: 16px;
+`;
+
+export const Button = styled.TouchableOpacity`
+  background-color: #788eec;
+  margin-left: 30px;
+  margin-right: 30px;
+  margin-top: 20px;
+  height: 48px;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ButtonTitle = styled.Text`
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+export const FooterView = styled.View`
+  align-items: center;
+  margin-top: 20px;
+`;
+
+export const FooterText = styled.Text`
+  font-size: 16px;
+  color: #2e2e2d;
+`;
+
+export const FooterLink = styled.Text`
+  color: #788eec;
+  font-weight: bold;
+  font-size: 16px;
+`;
